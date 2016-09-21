@@ -1,15 +1,28 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <strings.h>
+#include <string.h>
 #define MAX 1000
+
+typedef struct node * link;
+struct node {
+    int valor;
+    link next;
+};
+
 struct pilha
 {
-    int t;      /* t é o topo da pilha -- proximo espaco vazio do vetor */
-    int v[MAX]; /* v é o vetor que armazena os elementos da pilha */
+    link t;
 };
 
 /* Define um novo tipo de dado chamado Pilha que é um ponteiro para "struct pilha". */
 typedef struct pilha * Pilha;
+
+link createNode(int valor, link next){
+    link novo = malloc(sizeof * novo);
+    novo->valor = valor;
+    novo->next = next;
+    return novo;
+}
 
 /* Aloca espaço para armazenar uma nova Pilha */
 Pilha novaPilha () {
@@ -29,23 +42,28 @@ void destroiPilha (Pilha p)
 }
 /* Operação de inserir novo elemento na pilha */
 void push (Pilha p, int valor) {
-    p->v[(p->t)++] = valor;
+    p->t = createNode(valor, p->t);
 }
 /* Operação de remover um elemento da pilha */
-int pop (Pilha p) {
-    return p->v[--(p->t)];
+link pop (Pilha p) {
+    link topo = p->t;
+    p->t = topo->next;
+    free(topo);
+    return topo;
 }
 /* Operação para pegar o elemento do topo da pilha */
 int topo (Pilha p) {
-    return p->v[p->t - 1];
+    return p->t->valor;
 }
+
 /* Transforma a notação infixa para a notação posfixa */
 int infixoParaPosfixo (char * entrada, char * saida, int n)
 {
     Pilha p = novaPilha();
     int i,k ;
     int j = 0;
-    char c;
+    link sharp;
+    int c;
     push(p, '(');
     for (i = 0; entrada[i] != '\0' &&  i < n; i++)
         {
@@ -55,7 +73,8 @@ int infixoParaPosfixo (char * entrada, char * saida, int n)
                 push(p, entrada[i]);
             } else if(entrada[i] == ')'){
                 while (1) {
-                    c = pop(p);
+                    sharp = pop(p);
+                    c = sharp->valor;
                     if(c == '(') break;
                     saida[j++] = c;
                     saida[j++] = ' ';
@@ -89,7 +108,8 @@ int infixoParaPosfixo (char * entrada, char * saida, int n)
 
         }
     while (1) {
-        c = pop(p);
+        sharp = pop(p);
+        c = sharp->valor;
         if(c == '(') break;
         saida[j++] = c;
         saida[j++] = ' ';
@@ -105,16 +125,16 @@ int bemEncaixado (char* s) {
     int resultado = 1;
     for(i = 0; s[i] != '\0'; i++) {
         if(s[i] == '(') {
-            if(p->t >= MAX) {
+            /*if(p->t >= MAX) {
                 resultado = 0;
                 break;
-            }
+            }*/
             push(p, 1);
         } else if (s[i] == ')') {
-            if(p->t <= 0) {
+            /*if(p->t <= 0) {
                 resultado = 0;
                 break;
-            }
+            }*/
             pop(p);
         }
     }
@@ -131,7 +151,7 @@ int calcula ( char * s ) {
     int numero = 0;
     Pilha p = novaPilha();
     int resultado ;
-    int a,b;
+    link a,b;
     while  (s[i] != '\0') {
         if(s[i] >= '0' && s[i] <= '9' ) {
             sscanf(&s[i], "%d", & numero);
@@ -142,19 +162,19 @@ int calcula ( char * s ) {
         } else if (s[i] == '+') {
             b = pop(p);
             a = pop(p);
-            push (p, a + b);
+            push (p, a->valor + b->valor);
         } else if (s[i] == '-') {
             b = pop(p);
             a = pop(p);
-            push (p, a - b);
+            push (p, a->valor - b->valor);
         } else if (s[i] == '*') {
             b = pop(p);
             a = pop(p);
-            push (p, a * b);
+            push (p, a->valor * b->valor);
         } else if (s[i] == '/') {
             b = pop(p);
             a = pop(p);
-            push (p, a/b);
+            push (p, a->valor/b->valor);
         }
         i++;
     }
@@ -163,8 +183,6 @@ int calcula ( char * s ) {
     destroiPilha(p);
     return resultado;
 }
-
-
 
 /* Exemplo de utilização */
 int main () {
