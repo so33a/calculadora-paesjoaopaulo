@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define MAX 1000
 
 typedef struct node * link;
+
 struct node {
     int valor;
     link next;
@@ -14,7 +14,7 @@ struct pilha
     link t;
 };
 
-/* Define um novo tipo de dado chamado Pilha que é um ponteiro para "struct pilha". */
+/* Define um novo tipo de dado chamado Pilha que Ã© um ponteiro para "struct pilha". */
 typedef struct pilha * Pilha;
 
 link createNode(int valor, link next){
@@ -24,7 +24,11 @@ link createNode(int valor, link next){
     return novo;
 }
 
-/* Aloca espaço para armazenar uma nova Pilha */
+int pilhaVazia(Pilha p){
+    return (p->t == NULL);
+}
+
+/* Aloca espaÃ§o para armazenar uma nova Pilha */
 Pilha novaPilha () {
     Pilha p = malloc(sizeof(*p));
     if (p == NULL)
@@ -35,32 +39,38 @@ Pilha novaPilha () {
     p->t = 0; /* devemos inicializar o topo com 0 */
     return p;
 }
-/* Libera memória de uma dada pilha p */
-void destroiPilha (Pilha p)
-{
-    free(p);
-}
-/* Operação de inserir novo elemento na pilha */
+
+/* OperaÃ§Ã£o de inserir novo elemento na pilha */
 void push (Pilha p, int valor) {
     p->t = createNode(valor, p->t);
 }
-/* Operação de remover um elemento da pilha */
+
+/* OperaÃ§Ã£o de remover um elemento da pilha */
 link pop (Pilha p) {
-    link topo = p->t;
+    link topo = NULL;
+    topo = p->t;
     p->t = topo->next;
-    free(topo);
     return topo;
 }
-/* Operação para pegar o elemento do topo da pilha */
+
+/* Libera memÃ³ria de uma dada pilha p */
+void destroiPilha (Pilha p)
+{
+    while(!pilhaVazia(p))
+        pop(p);
+    free(p);
+}
+
+/* OperaÃ§Ã£o para pegar o elemento do topo da pilha */
 int topo (Pilha p) {
     return p->t->valor;
 }
 
-/* Transforma a notação infixa para a notação posfixa */
+/* Transforma a notaÃ§Ã£o infixa para a notaÃ§Ã£o posfixa */
 int infixoParaPosfixo (char * entrada, char * saida, int n)
 {
     Pilha p = novaPilha();
-    int i,k ;
+    int i;
     int j = 0;
     link sharp;
     int c;
@@ -125,16 +135,12 @@ int bemEncaixado (char* s) {
     int resultado = 1;
     for(i = 0; s[i] != '\0'; i++) {
         if(s[i] == '(') {
-            /*if(p->t >= MAX) {
-                resultado = 0;
-                break;
-            }*/
             push(p, 1);
         } else if (s[i] == ')') {
-            /*if(p->t <= 0) {
+            if(p->t <= 0) {
                 resultado = 0;
                 break;
-            }*/
+            }
             pop(p);
         }
     }
@@ -144,10 +150,8 @@ int bemEncaixado (char* s) {
     return resultado;
 }
 
-
 int calcula ( char * s ) {
     int i = 0;
-    int d = 0,k;
     int numero = 0;
     Pilha p = novaPilha();
     int resultado ;
@@ -184,10 +188,14 @@ int calcula ( char * s ) {
     return resultado;
 }
 
-/* Exemplo de utilização */
+/* Exemplo de utilizaÃ§Ã£o */
 int main () {
     char infixo[255] ;
     char posfixo[255];
+    
+    printf("Ex. 2 - %d\n", calcula("2 3 + 4 * 1 +")); //(2 + 3) * 4 + 1
+    printf("Ex. 3 - %d\n", calcula("5 2 3 4 + + *")); // ((4 + 3) +  2) * 5 
+
     printf("Sou uma calculadora de inteiros implementado com pilha!\n");
     printf("Digite quit para sair !\n");
     printf ("> ");
